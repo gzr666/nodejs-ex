@@ -29,7 +29,7 @@
     "jsonwebtoken": "^5.7.0",
     "lodash": "^4.5.1",
     "method-override": "^2.3.5",
-    "mongoose": "^4.4.4",
+    "mongoose": "*",
     "node-restful": "^0.2.5",
     "nodemailer": "^2.3.0"
   },
