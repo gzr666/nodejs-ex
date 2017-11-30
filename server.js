@@ -199,7 +199,11 @@ mongoose.connection.once("open",function(){
 
 
     console.log("mongoose");
-   app.listen(port,ipaddress);
+   app.listen(port, function(){
+
+
+
+ });
 
 
 });
