@@ -1,105 +1,211 @@
-//  OpenShift sample Node application
-var express = require('express'),
-    app     = express(),
-    morgan  = require('morgan');
+var express = require("express");
+var mongoose = require("mongoose");
+var bodyParser = require("body-parser");
+var methodOverride = require("method-override");
+var _ = require("lodash");
+var nodemailer = require('nodemailer');
+var jwt    = require('jsonwebtoken');
+var config = require("./models/config.js");
+/* var email 	= require("./node_modules/emailjs/email");
+var server 	= email.server.connect({
+   user:    "bleksabat666@gmail.com", 
+   password:"sabbath666", 
+   host:    "smtp.gmail.com", 
+   ssl:     true
+}); */
+
+var transporter = nodemailer.createTransport('smtps://bleksabat666@gmail.com:sabbath666@smtp.gmail.com');
+
+var app = express();
+
+//openshift or local
+
+/*
+var ipaddress = process.env.OPENSHIFT_NODEJS_IP || "127.0.0.1";
+var port = process.env.OPENSHIFT_NODEJS_PORT || 3000; 
+
+//mongo connectionstring
+//mongodb configuration
+var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
+var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || 27017;
+var mongoUser = "admin"; //mongodb username
+var mongoPass = "t2Nnf6Uc5gRx"; //mongodb password
+var mongoDb   = "nodesinj"; //mongodb database name
+
+var mongoString = 'mongodb://' + mongoUser + ':' + mongoPass + '@' + mongoHost + ':' + mongoPort +  '/' + mongoDb;
+
+if (typeof process.env.OPENSHIFT_MONGODB_DB_HOST === "undefined") {
     
-Object.assign=require('object-assign')
+    mongoString = "mongodb://localhost/nodesinj";
+  };
 
-app.engine('html', require('ejs').renderFile);
-app.use(morgan('combined'))
+*/
 
-var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080,
-    ip   = process.env.IP   || process.env.OPENSHIFT_NODEJS_IP || '0.0.0.0',
-    mongoURL = process.env.OPENSHIFT_MONGODB_DB_URL || process.env.MONGO_URL,
-    mongoURLLabel = "";
+var port = process.env.PORT;
 
-if (mongoURL == null && process.env.DATABASE_SERVICE_NAME) {
-  var mongoServiceName = process.env.DATABASE_SERVICE_NAME.toUpperCase(),
-      mongoHost = process.env[mongoServiceName + '_SERVICE_HOST'],
-      mongoPort = process.env[mongoServiceName + '_SERVICE_PORT'],
-      mongoDatabase = process.env[mongoServiceName + '_DATABASE'],
-      mongoPassword = process.env[mongoServiceName + '_PASSWORD']
-      mongoUser = process.env[mongoServiceName + '_USER'];
+//mongo connectionstring
+//mongodb configuration open shift
+/*var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
+var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || 27017;
+var mongoUser = "admin"; //mongodb username
+var mongoPass = "Buz-S9gtgMTm"; //mongodb password
+var mongoDb   = "stationlocator"; //mongodb database name*/
 
-  if (mongoHost && mongoPort && mongoDatabase) {
-    mongoURLLabel = mongoURL = 'mongodb://';
-    if (mongoUser && mongoPassword) {
-      mongoURL += mongoUser + ':' + mongoPassword + '@';
-    }
-    // Provide UI label that excludes user id and pw
-    mongoURLLabel += mongoHost + ':' + mongoPort + '/' + mongoDatabase;
-    mongoURL += mongoHost + ':' +  mongoPort + '/' + mongoDatabase;
 
+//heroku
+var mongoHost = process.env.OPENSHIFT_MONGODB_DB_HOST || 'localhost';
+var mongoPort = process.env.OPENSHIFT_MONGODB_DB_PORT || 27017;
+var mongoUser = "geezer"; //mongodb username
+var mongoPass = "sabbath66"; //mongodb password
+var mongoDb   = "stationlocator"; //mongodb database name
+
+
+
+var mongoString = 'mongodb://' + mongoUser + ':' + mongoPass + '@' + 'ds243055.mlab.com:43055/stationlocator';
+
+
+//enabling static files
+app.use(express.static(__dirname + "/public"));
+
+//adding middlewares
+app.use(bodyParser.urlencoded({extended:true}));
+app.use(bodyParser.json());
+app.use(methodOverride("X-HTTP-Method-Override"));
+
+app.use(function(req,res,next){
+
+    res.header("Access-Control-Allow-Origin","*");
+    res.header("Access-Control-Allow-Methods","GET,PUT,POST,DELETE");
+    res.header("Access-Control-Allow-Headers","Content-Type, Access-Control-Allow-Headers, Authorization, X-Requested-With");
+    if ('OPTIONS' === req.method) {
+    res.send(200);
+  } 
+  else {
+    next();
   }
-}
-var db = null,
-    dbDetails = new Object();
+    
 
-var initDb = function(callback) {
-  if (mongoURL == null) return;
+});
 
-  var mongodb = require('mongodb');
-  if (mongodb == null) return;
 
-  mongodb.connect(mongoURL, function(err, conn) {
-    if (err) {
-      callback(err);
-      return;
-    }
+app.get("/test",function(req,res,next){
 
-    db = conn;
-    dbDetails.databaseName = db.databaseName;
-    dbDetails.url = mongoURLLabel;
-    dbDetails.type = 'MongoDB';
+res.send("Hello World");
 
-    console.log('Connected to MongoDB at: %s', mongoURL);
-  });
+
+
+});
+
+app.post("/mail",function(req,res,next){
+
+/* server.send({
+   text:    "i hope this works", 
+   from:    "someone@mail.com", 
+   to:      "bleksabat666@gmail.com",
+   cc:      "else <else@your-email.com>",
+   subject: "testing emailjs"
+}, function(err, message) { console.log(err || message); });
+ */
+ 
+ var test = "is it working";
+ 
+ var mailOptions = {
+    from: '"Booking Aplikacija: "<bleksabat666@gmail.com>', // sender address
+    to: "bleksabat666@gmail.com", // list of receivers
+    subject: 'Upit - Booking', // Subject line
+    text: 'Hello world 🐴', // plaintext body
+    html: '<b>Upit za booking</b>' + 
+    '<br>Ime: ' + req.body.firstname + 
+    '<br>Prezime: ' + req.body.lastname +
+    '<br>Email: ' + req.body.mail + 
+    '<br>Telefon: ' + req.body.phone + 
+    '<br>Mobitel: ' + req.body.mobile + 
+    '<br>Smjestajna jedinica: ' + req.body.smjedinica + 
+    '<br>Dolazak: ' + req.body.dolazak  +
+    '<br>Odlazak: ' + req.body.odlazak + 
+    '<br>Broj odraslih: ' + req.body.brojodraslih + 
+    '<br>Broj djece do 6 god. : ' + req.body.brojdjecedo6 + 
+    '<br>Broj djece od 6 do 12 god. : ' + req.body.brojdjeceod6 + 
+    '<br>Upit: ' + req.body.upit 
+
+	
 };
 
-app.get('/', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    var col = db.collection('counts');
-    // Create a document with request IP and current time of request
-    col.insert({ip: req.ip, date: Date.now()});
-    col.count(function(err, count){
-      res.render('index.html', { pageCountMessage : count, dbInfo: dbDetails });
+transporter.sendMail(mailOptions, function(error, info){
+    if(error){
+     console.log(error);
+    }
+    console.log('Message sent: ' + info.response);
+
+});
+
+res.send({success:"success"});
+
+next();
+
+
+});
+
+app.post("/token",function(req,res){
+
+  var user = config.user;
+  console.log(user);
+  var claims = {
+    "user":user.username,
+    "role":"admin"
+
+  };
+console.log(req.body.password);
+console.log(user.password);
+
+  if (user.password !== req.body.password) {
+
+        res.status(400).send({ success: false, message: 'Authentication failed. Wrong password.' });
+        
+      }
+
+       else {
+
+        // if user is found and password is right
+        // create a token
+        var token = jwt.sign(claims, config.secret, {
+          expiresIn: 1000000 // expires in 24 hours
+        });
+
+        res.send({ user:"rade",
+
+        role:"admin",
+        token:token });
+
+      }
+      
+
+});
+
+//connect to mongodb
+mongoose.connect(mongoString);
+
+mongoose.connection.once("open",function(){
+
+    app.models = require("./models/index.js");
+
+    var routes = require("./routes");
+
+    _.each(routes,function(controller,route){
+
+        app.use(route,controller(app,route));
+
     });
-  } else {
-    res.render('index.html', { pageCountMessage : null});
-  }
+
+
+    console.log("mongoose");
+   app.listen(port,ipaddress);
+
+
 });
 
-app.get('/pagecount', function (req, res) {
-  // try to initialize the db on every request if it's not already
-  // initialized.
-  if (!db) {
-    initDb(function(err){});
-  }
-  if (db) {
-    db.collection('counts').count(function(err, count ){
-      res.send('{ pageCount: ' + count + '}');
-    });
-  } else {
-    res.send('{ pageCount: -1 }');
-  }
-});
 
-// error handling
-app.use(function(err, req, res, next){
-  console.error(err.stack);
-  res.status(500).send('Something bad happened!');
-});
 
-initDb(function(err){
-  console.log('Error connecting to Mongo. Message:\n'+err);
-});
 
-app.listen(port, ip);
-console.log('Server running on http://%s:%s', ip, port);
 
-module.exports = app ;
+
