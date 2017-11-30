@@ -39,6 +39,6 @@ var ApartmanSchema = new mongoose.Schema({
 
 },{collection: 'apartman'});
 
-var movie = mongoose.model('apartman', ApartmanSchema);
+var movie = mongoose.model('apartman', ApartmanSchema,'apartman');
 
 module.exports = movie;
