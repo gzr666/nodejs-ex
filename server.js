@@ -43,7 +43,7 @@ if (typeof process.env.OPENSHIFT_MONGODB_DB_HOST === "undefined") {
 
 */
 
-var port = process.env.PORT;
+var port = process.env.PORT || process.env.OPENSHIFT_NODEJS_PORT || 8080;
 
 //mongo connectionstring
 //mongodb configuration open shift
