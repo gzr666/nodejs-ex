@@ -6,6 +6,7 @@ var _ = require("lodash");
 var nodemailer = require('nodemailer');
 var jwt    = require('jsonwebtoken');
 var config = require("./models/config.js");
+var Apartman = require('./models/Apartman')
 /* var email 	= require("./node_modules/emailjs/email");
 var server 	= email.server.connect({
    user:    "bleksabat666@gmail.com", 
@@ -187,15 +188,13 @@ mongoose.connect(mongoString);
 
 mongoose.connection.once("open",function(){
 
-    app.models = require("./models/index.js");
+    
+var apartmanResource = restful.model("apartman",Apartman.shema)
+.methods(["get","post","put","delete"]);
+apartmanResource.register(app,"/api/apartmani");
+   
 
-    var routes = require("./routes");
-
-    _.each(routes,function(controller,route){
-
-        app.use(route,controller(app,route));
-
-    });
+    
 
 
     console.log("mongoose");

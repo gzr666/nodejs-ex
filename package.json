@@ -23,15 +23,15 @@
     "npm": ">= 1.0.0"
   },
   "dependencies": {
-    "body-parser": "^1.15.0",
-    "emailjs": "^1.0.4",
-    "express": "^4.13.4",
-    "jsonwebtoken": "^5.7.0",
-    "lodash": "^4.5.1",
-    "method-override": "^2.3.5",
+    "body-parser": "*",
+    "emailjs": "*",
+    "express": "*",
+    "jsonwebtoken": "*",
+    "lodash": "*",
+    "method-override": "*",
     "mongoose": "*",
     "node-restful": "*",
-    "nodemailer": "^2.3.0"
+    "nodemailer": "*"
   },
   "devDependencies": {},
   "bundleDependencies": [],
