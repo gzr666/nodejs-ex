@@ -2,11 +2,12 @@ var express = require("express");
 var mongoose = require("mongoose");
 var bodyParser = require("body-parser");
 var methodOverride = require("method-override");
+var restful = require('node-restful');
 var _ = require("lodash");
 var nodemailer = require('nodemailer');
 var jwt    = require('jsonwebtoken');
 var config = require("./models/config.js");
-var Apartman = require('./models/Apartman')
+var Apartman = require('./models/Apartman');
 /* var email 	= require("./node_modules/emailjs/email");
 var server 	= email.server.connect({
    user:    "bleksabat666@gmail.com", 
